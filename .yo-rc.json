@@ -1,0 +1,9 @@
+{
+  "generator-react-webpack": {
+    "appName": "uprise-test",
+    "style": "scss",
+    "cssmodules": false,
+    "postcss": false,
+    "generatedWithVersion": 4
+  }
+}

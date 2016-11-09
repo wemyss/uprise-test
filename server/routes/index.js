@@ -7,23 +7,23 @@ module.exports = function() {
     method: 'GET',
     path: '/coaches',
     handler: function(request, reply) {
-      models.Coach.findAll()
-        .then((user) => {
-
-          reply(user);
-
+      models.Coach.findAll({
+          attributes: ['name', 'email']
+        })
+        .then((users) => {
+          reply(users);
         });
-
     }
   }, {
-    method: 'GET',
-    path: '/coaches/addOneTest',
+    method: 'POST',
+    path: '/coaches/addOne',
     handler: function(request, reply) {
-      models.Coach.create({name: "sam wemyss"})
+      models.Coach.create({
+          name: request.payload.name,
+          email: request.payload.email
+        })
         .then((user) => {
-
-          reply('added a coach: ' + user.name);
-
+          reply('added coach ' + user.name);
         });
 
     }

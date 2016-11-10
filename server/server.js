@@ -13,7 +13,6 @@ server.connection({
 
 // serve static files under /dist/*
 server.register(require('inert'), (err) => {
-
   if (err) {
     throw err;
   }

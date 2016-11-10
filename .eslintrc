@@ -8,6 +8,7 @@
   "extends": "airbnb",
   "rules": {
     "comma-dangle": ["off"],
+    "prefer-template": ["warn"],
     "no-unused-vars": ["warn"],
     "object-curly-spacing": ["off"],
     "padded-blocks": ["off"],
@@ -19,9 +20,6 @@
         "ignore": [
           "config",
           "components/",
-          "stores/",
-          "actions/",
-          "sources/",
           "styles/",
           "images/"
         ]

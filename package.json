@@ -71,8 +71,10 @@
     "webpack-hot-middleware": "^2.13.1"
   },
   "dependencies": {
+    "bulma": "^0.2.3",
     "hapi": "^15.2.0",
     "inert": "^4.0.2",
+    "node-uuid": "^1.4.7",
     "pg": "^6.1.0",
     "pg-hstore": "^2.3.2",
     "react": "^15.0.1",

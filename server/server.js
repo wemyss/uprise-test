@@ -3,12 +3,13 @@
 const Hapi = require('hapi');
 const models = require('./models');
 const routes = require('./routes');
+const Path = require('path');
 
 
 // create the server
 const server = new Hapi.Server();
 server.connection({
-  port: 3000
+  port: process.env.PORT || 3000
 });
 
 // serve static files under /dist/*
@@ -22,7 +23,7 @@ server.register(require('inert'), (err) => {
     path: '/{file*}',
     handler: {
       directory: {
-        path: '../dist'
+        path: Path.join(__dirname, '../dist')
       }
     }
   });
@@ -38,5 +39,6 @@ models.sequelize.sync().then(() => {
       console.error(err)
     }
     console.log("Server started at", server.info.uri);
+    console.log(__dirname);
   });
 });

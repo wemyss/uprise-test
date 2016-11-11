@@ -1,11 +1,12 @@
-// thanks to the sequelize docs
+'use strict';
+
 const fs = require('fs'),
   path = require('path'),
   Sequelize = require('sequelize'),
   config = require('../config/sequelize-config'),
   db = {};
 
-let sequelize = new Sequelize(config.db.database, config.db.user, config.db.password, config.db.options);
+var sequelize = new Sequelize(config.db.database, config.db.user, config.db.password, config.db.options);
 
 fs.readdirSync(__dirname).filter(function(file) {
   return (file.indexOf('.') !== 0) && (file !== 'index.js');

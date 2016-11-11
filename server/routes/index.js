@@ -9,7 +9,8 @@ module.exports = function() {
     path: '/coaches',
     handler(request, reply) {
       models.Coach.findAll({
-          attributes: ['id', 'name', 'email', 'active']
+          attributes: ['id', 'name', 'email', 'active'],
+          order: '"createdAt" DESC'
         })
         .then((users) => {
           reply(users);
@@ -22,7 +23,9 @@ module.exports = function() {
       models.Coach.destroy({
         where: {}
       }).then(() => {
-        reply('Removed all coaches!');
+        reply(models.Coach.findAll({
+          attributes: ['id', 'name', 'email', 'active']
+        }));
       });
     }
   }, {
@@ -35,7 +38,7 @@ module.exports = function() {
           active: true
         })
         .then((user) => {
-          reply('added coach ' + user.name);
+          reply(user);
         });
 
     }
@@ -45,23 +48,34 @@ module.exports = function() {
     handler(request, reply) {
       models.Coach.destroy({
         where: {
-          id: _id
+          id: request.params._id
         }
-      });
+      }).then(reply('testtestetsetset'));
     }
   }, {
     method: 'POST',
     path: '/coaches/{_id}/update',
     handler(request, reply) {
+      let coach = {};
+
+      if (request.payload.name !== undefined) {
+        coach.name = request.payload.name;
+      }
+      if (request.payload.email !== undefined) {
+        coach.email = request.payload.email;
+      }
+      if (request.payload.name !== undefined) {
+        coach.active = request.payload.active;
+      }
+
       models.Coach
-        .update({
-          name: request.payload.name,
-          email: request.payload.email,
-          active: request.payload.active
-        }, {
-          id: _id
+        .update(coach, {
+          where: {
+            id: request.params._id
+          }
         }).then((rowsAffected) => {
           console.log('updated ' + rowsAffected[0] + 'rows');
+          reply('updated yo');
         });
     }
   }];

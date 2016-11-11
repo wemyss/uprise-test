@@ -1,4 +1,6 @@
 $green: #23d160;
+$red: #ff3860;
+$custom-grey: #e5e5e5;
 
 @import "~bulma/bulma";
 
@@ -6,5 +8,25 @@ i.is-green {
   color: $green;
 }
 i.is-grey {
-  color: #eee;
+  color: $custom-grey;
+}
+i.is-red {
+  color: $red;
+}
+
+i.delete-icon {
+  color: $custom-grey;
+  &:hover {
+    @extend i.is-red;
+    cursor: pointer;
+  }
+
+}
+
+.active-status {
+  padding-right: 10px;
+}
+
+.table td, .table th {
+  width: 50%;
 }

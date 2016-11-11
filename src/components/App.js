@@ -2,35 +2,8 @@ import React from 'react';
 import './app.scss';
 const request = require('superagent');
 
-const CoachList = ({coaches}) => (
-  <table className="table">
-    <thead>
-      <tr>
-        <th>Active</th>
-        <th>Name</th>
-        <th>Email</th>
-      </tr>
-    </thead>
-    <tbody>
-      {coaches.map(coach => (
-        <tr key={coach.id}>
-          <td>
-            <i
-              className={'fa fa-circle' + (coach.active ? ' is-green' : '-o is-grey')}
-              aria-hidden="true">
-            </i>
-          </td>
-          <td>{coach.name}</td>
-          <td>{coach.email}</td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-);
-CoachList.propTypes = {
-  coaches: React.PropTypes.array
-};
-
+import Admin from './Admin/Admin';
+import CoachList from './CoachList';
 
 class App extends React.Component {
   constructor() {
@@ -38,15 +11,23 @@ class App extends React.Component {
     this.getCoaches = this.getCoaches.bind(this);
     this.removeAllCoaches = this.removeAllCoaches.bind(this);
     this.addCoach = this.addCoach.bind(this);
+    this.removeCoach = this.removeCoach.bind(this);
+    this.toggleActive = this.toggleActive.bind(this);
+    this.updateCoach = this.updateCoach.bind(this);
+    this.changeName = this.changeName.bind(this);
+    this.changeEmail = this.changeEmail.bind(this);
+    this.toggleAdmin = this.toggleAdmin.bind(this);
+    this.displayCoaches = this.displayCoaches.bind(this);
     this.render = this.render.bind(this);
 
     this.state = {
-      coaches: []
+      coaches: [],
+      isAdmin: false
     };
   }
 
   componentDidMount() {
-    this.interval = setInterval(() => this.getCoaches(), 600);
+    this.getCoaches();
   }
 
   componentWillUnmount() {
@@ -54,20 +35,19 @@ class App extends React.Component {
   }
 
   getCoaches() {
+    const self = this;
     request
       .get('/coaches')
       .end((err, res) => {
         if (err) {
           throw err;
         }
-        console.log(res);
-        this.setState({
-          coaches: res.body
-        });
+        self.setState({coaches: res.body});
       });
   }
 
   removeAllCoaches() {
+    const self = this;
     request
       .post('/coaches/removeAll')
       .send()
@@ -75,24 +55,104 @@ class App extends React.Component {
         if (err || !res.ok) {
           console.error('error in removing all');
         } else {
-          console.log('all good!');
+          self.setState({coaches: res.body});
         }
       });
   }
 
-  addCoach() {
-    const d = new Date();
-
+  addCoach(name, email) {
+    const self = this;
     request
       .post('/coaches/addOne')
-      .send({name: `coach  ${d.getTime()}`, email: 'bigdog@email.com'})
+      .send({name, email})
       .end((err, res) => {
         if (err || !res.ok) {
           console.error('error');
         } else {
-          console.log('added one i think!');
+          self.setState((prevState) => ({ coaches: [res.body].concat(prevState.coaches) }));
         }
       });
+  }
+
+  removeCoach(id) {
+    const self = this;
+    request
+      .post(`/coaches/${id}/remove`)
+      .send()
+      .end((err, res) => {
+        if (err || !res.ok) {
+          console.error('error');
+        } else {
+          self.getCoaches();
+        }
+      });
+  }
+
+  toggleActive(coachId) {
+    const pos = this.state.coaches.map((coach) => (coach.id)).indexOf(coachId);
+    if (pos >= 0) {
+      // const coaches = this.state.coaches;
+      // coaches[pos].active = !coaches[pos].active;
+      const c = this.state.coaches[pos];
+      // this.setState({coaches});
+      this.updateCoach(c.id, c.name, c.email, !c.active);
+    }
+  }
+
+  updateCoach(id, name, email, active) {
+    const data = {};
+    if (name !== null) {
+      data.name = name;
+    }
+    if (email !== null) {
+      data.email = email;
+    }
+    if (active !== null) {
+      data.active = active;
+    }
+    const self = this;
+    request
+      .post(`/coaches/${id}/update`)
+      .send(data)
+      .end((err, res) => {
+        if (err || !res.ok) {
+          console.error('error');
+        } else {
+          console.log('all good!');
+          self.getCoaches();
+        }
+      });
+  }
+
+  changeName(newName, coachId) {
+    this.updateCoach(coachId, newName, null, null);
+  }
+
+  changeEmail(newEmail, coachId) {
+    this.updateCoach(coachId, null, newEmail, null);
+  }
+
+  toggleAdmin() {
+    this.setState({isAdmin: !this.state.isAdmin});
+  }
+
+  displayCoaches() {
+    let coachList = <CoachList coaches={this.state.coaches}/>;
+    if (this.state.isAdmin) {
+      coachList = (
+        <Admin
+          addCoach={this.addCoach}
+          changeEmail={this.changeEmail}
+          changeName={this.changeName}
+          coaches={this.state.coaches}
+          getCoaches={this.getCoaches}
+          removeAllCoaches={this.removeAllCoaches}
+          removeCoach={this.removeCoach}
+          toggleActive={this.toggleActive}
+        />
+      );
+    }
+    return coachList;
   }
 
   render() {
@@ -103,23 +163,20 @@ class App extends React.Component {
             <div className="container">
               <h1 className="title">Coaching System</h1>
               <h2 className="subtitle">Sam Wemyss</h2>
+              <div className="is-pulled-right">
+                <button onClick={this.toggleAdmin} className="button is-primary is-inverted">
+                  <span className="icon is-small">
+                    <i className="fa fa-user" aria-hidden="true"></i>
+                  </span>
+                  <span>{this.state.isAdmin ? 'Logout' : 'Login'}</span>
+                </button>
+              </div>
             </div>
           </div>
         </section>
         <div className="section">
           <div className="container">
-            <div className="control is-grouped">
-              <p className="control">
-                <a onClick={this.getCoaches} className="button is-info">Get Coaches</a>
-              </p>
-              <p className="control">
-                <a onClick={this.addCoach} className="button is-info">Add Coach</a>
-              </p>
-              <p className="control">
-                <a onClick={this.removeAllCoaches} className="button is-info">Remove All</a>
-              </p>
-            </div>
-            <CoachList coaches={this.state.coaches}/>
+            {this.displayCoaches()}
           </div>
         </div>
       </div>
